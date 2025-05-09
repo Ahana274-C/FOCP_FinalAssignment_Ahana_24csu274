@@ -1,0 +1,206 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+class Person {
+public:
+    string name;
+    int age;
+    string id;
+    string contact;
+
+    Person(string nm, int a, string ID, string c)
+        : name(nm), age(a), id(ID), contact(c) {}
+
+    void showDetails() {
+        cout << "Name: " << name << "\nAge: " << age
+             << "\nID: " << id << "\nContact: " << contact << endl;
+    }
+};
+
+class Student : public Person {
+public:
+    string enrollmentDate;
+    string program;
+    float cgpa;
+
+    Student(string nm, int a, string ID, string c, string ed, string pr, float g)
+        : Person(nm, a, ID, c), enrollmentDate(ed), program(pr), cgpa(g) {}
+
+    void showStudentDetails() {
+        showDetails();
+        cout << "Enrollment: " << enrollmentDate << "\nProgram: " << program << "\nCGPA: " << cgpa << endl;
+    }
+};
+
+class UndergraduateStudent : public Student {
+public:
+    string major;
+    string minor;
+    string graduationDate;
+
+    UndergraduateStudent(string nm, int a, string ID, string c, string ed, string pr, float g,
+                         string mj, string mn, string gd)
+        : Student(nm, a, ID, c, ed, pr, g), major(mj), minor(mn), graduationDate(gd) {}
+
+    void showUndergraduateDetails() {
+        showStudentDetails();
+        cout << "Major: " << major << "\nMinor: " << minor << "\nGraduation: " << graduationDate << endl;
+    }
+};
+
+// GraduateStudent
+class GraduateStudent : public Student {
+public:
+    string resTopic;
+    string advisor;
+    string thesis;
+    bool hasTeaching;
+    bool hasResearch;
+
+    GraduateStudent(string n, int a, string i, string c, string ed, string pr, float g,
+                    string rt, string adv, string th, bool t, bool r)
+        : Student(n, a, i, c, ed, pr, g), resTopic(rt), advisor(adv), thesis(th),
+          hasTeaching(t), hasResearch(r) {}
+
+    void showGraduateDetails() {
+        showStudentDetails();
+        cout << "Research Topic: " << resTopic << "\nAdvisor: " << advisor
+             << "\nThesis: " << thesis
+             << "\nTeaching: " << (hasTeaching ? "Yes" : "No")
+             << "\nResearch Assistant: " << (hasResearch ? "Yes" : "No") << endl;
+    }
+};
+
+class Professor : public Person {
+public:
+    string department;
+    string specialization;
+    string hireDate;
+    int yearsOfService;
+    string rank;
+    float baseSalary;
+    float researchGrants;
+
+    Professor(string n, int a, string i, string c, string d, string s, string h,
+              int y, string r, float b, float rg)
+        : Person(n, a, i, c), department(d), specialization(s), hireDate(h),
+          yearsOfService(y), rank(r), baseSalary(b), researchGrants(rg) {}
+
+    void showProfessorDetails() {
+        showDetails();
+        cout << "Department: " << department << "\nSpecialization: " << specialization
+             << "\nHire Date: " << hireDate << "\nYears of Service: " << yearsOfService
+             << "\nRank: " << rank << "\nBase Salary: " << baseSalary
+             << "\nResearch Grants: " << researchGrants << endl;
+    }
+
+    float calculateSalary() {
+        float rankBonus = 0;
+        if (rank == "Assistant") rankBonus = 2000;
+        else if (rank == "Associate") rankBonus = 4000;
+        else if (rank == "Full") rankBonus = 6000;
+        return baseSalary + (yearsOfService * 1000) + rankBonus + researchGrants;
+    }
+};
+
+class Department {
+public:
+    string name;
+    vector<Professor*> professors;
+
+    Department(string n) : name(n) {}
+
+    void addProfessor(Professor* p) {
+        professors.push_back(p);
+    }
+
+    void showDepartment() {
+        cout << "\nDepartment: " << name << endl;
+        for (auto p : professors) {
+            p->showProfessorDetails();
+            cout << "Total Salary: " << p->calculateSalary() << "\n\n";
+        }
+    }
+};
+
+class Course {
+public:
+    string name;
+    Professor* instructor;
+
+    Course(string n, Professor* p) : name(n), instructor(p) {}
+
+    void showCourse() {
+        cout << "\nCourse: " << name << "\nInstructor: ";
+        if (instructor) instructor->showProfessorDetails();
+        else cout << "None\n";
+    }
+};
+class Classroom {
+public:
+    string roomNumber;
+    int capacity;
+
+    Classroom(string rn, int cap) : roomNumber(rn), capacity(cap) {}
+};
+
+class Schedule {
+public:
+    string courseName;
+    string timeSlot;
+    Classroom* classroom;
+
+    Schedule(string c, string t, Classroom* cr) : courseName(c), timeSlot(t), classroom(cr) {}
+
+    void showSchedule() {
+        cout << "\nSchedule for " << courseName << "\nTime: " << timeSlot
+             << "\nRoom: " << classroom->roomNumber << ", Capacity: " << classroom->capacity << endl;
+    }
+};
+
+class University {
+public:
+    vector<Department*> departments;
+
+    void addDepartment(Department* d) {
+        departments.push_back(d);
+    }
+
+    void showUniversity() {
+        for (auto d : departments) {
+            d->showDepartment();
+        }
+    }
+};
+
+int main() {
+    Professor* p1 = new Professor("Abhay", 40, "P01", "abhay@ncuindia.edu", "CS", "AI", "2024", 5, "Assistant", 70000, 2000);
+    Professor* p2 = new Professor("Neha", 50, "P02", "Neha@ncuindia.edu", "Math", "Algebra", "2023", 10, "Full", 90000, 5000);
+
+    Department* cs = new Department("Computer Science");
+    Department* math = new Department("Mathematics");
+    cs->addProfessor(p1);
+    math->addProfessor(p2);
+
+    University uni;
+    uni.addDepartment(cs);
+    uni.addDepartment(math);
+    uni.showUniversity();
+
+    Course course1("Algorithms", p1);
+    course1.showCourse();
+
+   
+    Classroom room101("101", 50);
+    Schedule schedule("Algorithms", "Mon 10AM", &room101);
+    schedule.showSchedule();
+
+    delete p1;
+    delete p2;
+    delete cs;
+    delete math;
+
+    return 0;
+}
