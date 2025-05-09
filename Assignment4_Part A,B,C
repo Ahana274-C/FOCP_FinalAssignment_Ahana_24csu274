@@ -1,0 +1,220 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+class UniversitySystemException {
+public:
+    string message;
+    UniversitySystemException(string msg) { message = msg; }
+};
+
+class EnrollmentException : public UniversitySystemException {
+public:
+    EnrollmentException(string msg) : UniversitySystemException(msg) {}
+};
+
+class GradeException : public UniversitySystemException {
+public:
+    GradeException(string msg) : UniversitySystemException(msg) {}
+};
+
+class PaymentException : public UniversitySystemException {
+public:
+    PaymentException(string msg) : UniversitySystemException(msg) {}
+};
+
+class Person {
+protected:
+    string name;
+    int age;
+    int id;
+    string contact;
+
+public:
+    Person(string n, int a, int i, string c) {
+        if (i <= 0) {
+            throw UniversitySystemException("Invalid ID");
+        }
+        if (c.length() < 10) {
+            throw UniversitySystemException("Invalid contact information");
+        }
+
+        name = n;
+        age = a;
+        id = i;
+        contact = c;
+    }
+
+    void displayDetails() {
+        cout << "Name: " << name << ", Age: " << age<< ", ID: " << id << ", Contact: " << contact << endl;
+    }
+
+    float calculatePayment() { 
+        return 0; 
+    }
+};
+
+class Student : public Person {
+    float gpa;
+
+public:
+    Student(string n, int a, int i, string c, float g) : Person(n, a, i, c) {
+        if (g < 0 || g > 4.0) {
+            throw GradeException("Invalid GPA entered.");
+        }
+        gpa = g;
+    }
+
+    void displayDetails() {
+        Person::displayDetails();
+        cout << "GPA: " << gpa << endl;
+    }
+};
+
+class Professor : public Person {
+protected:
+    float sal;
+
+public:
+    Professor(string n, int a, int i, string c, float s) : Person(n, a, i, c) {
+        if (s < 0) {
+            throw PaymentException("Salary cannot be negative.");
+        }
+        sal = s;
+    }
+
+    void displayDetails() {
+        Person::displayDetails();
+        cout << "Salary:" << sal << endl;
+    }
+
+    float calculatePayment() {
+        return sal;
+    }
+};
+
+class AssistantProfessor : public Professor {
+public:
+    AssistantProfessor(string n, int a, int i, string c, float s)
+        : Professor(n, a, i, c, s) {}
+
+    float calculatePayment() {
+        return sal * 0.1;
+    }
+};
+
+class EnrollmentManager {
+    vector<int> enrolled_St;
+
+public:
+    void enrollStudent(int studentID) {
+        if (enrolled_St.size() >= 5) {
+            throw EnrollmentException("Course is full.");
+        }
+        enrolled_St.push_back(studentID);
+        cout << "Student ID " << studentID << " enrolled successfully.\n";
+    }
+};
+
+class GradeBook {
+    vector<int> studentIDs;
+    vector<float> grades;
+
+public:
+    void addGrade(int studentID, float grade) {
+        if (grade < 0 || grade > 4.0) {
+            throw GradeException("Invalid grade entry.");
+        }
+        studentIDs.push_back(studentID);
+        grades.push_back(grade);
+    }
+};
+
+class UniversitySystem {
+    vector<Student> students;
+    vector<Professor*> professors; 
+    EnrollmentManager enrollmentManager;
+    GradeBook gradeBook;
+
+public:
+    void addStudent(string name, int age, int id, string contact, float gpa) {
+        try {
+            Student s(name, age, id, contact, gpa);
+            students.push_back(s);
+        } catch (UniversitySystemException& e) {
+            cout << "Student creation error: " << e.message << endl;
+        } catch (GradeException& e) {
+            cout << "GPA error: " << e.message << endl;
+        }
+    }
+
+    void addProfessor(string name, int age, int id, string contact, float salary, string rank) {
+        try {
+            if (rank == "Assistant") {
+                professors.push_back(new AssistantProfessor(name, age, id, contact, salary));
+            } else {
+                cout << "Error: Invalid professor rank.\n";
+            }
+        } catch (PaymentException& e) {
+            cout << "Professor creation error: " << e.message << endl;
+        }
+    }
+
+    void enrollStudent(int studentID) {
+        try {
+            enrollmentManager.enrollStudent(studentID);
+        } catch (EnrollmentException& e) {
+            cout << "Enrollment error: " << e.message << endl;
+        }
+    }
+
+    void addGrade(int studentID, float grade) {
+        try {
+            gradeBook.addGrade(studentID, grade);
+        } catch (GradeException& e) {
+            cout << "Grading error: " << e.message << endl;
+        }
+    }
+
+    void displayProfessors() {
+        for (int i = 0; i < professors.size(); i++) {
+            professors[i]->displayDetails();
+        }
+    }
+
+    void displayStudents() {
+        for (int i = 0; i < students.size(); i++) {
+            students[i].displayDetails();
+        }
+    }
+};
+
+int main() {
+    UniversitySystem university;
+
+    university.addStudent("Ahana", 19, 1, "1234567890", 4.0);
+    university.addStudent("Aanya", 21, 2, "1234567890", 5.0);
+
+    university.addProfessor("Dr. Smriti", 45, 101, "0987654321", 50000, "Assistant");
+    university.addProfessor("Dr. Sweta", 50, 102, "09876", -20000, "Assistant"); 
+
+    university.enrollStudent(1);
+    university.enrollStudent(2);
+    university.enrollStudent(3);
+    university.enrollStudent(4);
+    university.enrollStudent(5);
+    university.enrollStudent(6); 
+
+    university.addGrade(1, 3.8);
+    university.addGrade(1, 5.0); 
+
+    cout << "Professors\n";
+    university.displayProfessors();
+
+    cout << "Students\n";
+    university.displayStudents();
+
+    return 0;
+}
