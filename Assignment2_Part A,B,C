@@ -1,0 +1,236 @@
+#include <iostream>
+#include <string>
+#include <vector>  
+using namespace std;
+
+
+class Person {
+private:
+    string name;
+    int age;
+    int ID;
+    string contact;
+
+public:
+  
+    Person(string name, int age, int id, string c) {
+        setName(name);
+        setAge(age);
+        setID(id);
+        setContact(c);
+    }
+    void setName(string n) { 
+        name = (n.empty() ? "Unknown" : n);
+    }
+    void setAge(int a) { 
+        age = (a > 0 && a < 130) ? a : 18; 
+    }
+    void setID(int id) { 
+        ID = id; 
+    }
+    void setContact(string c) {
+         contact = c; 
+        }
+
+    string getn() const {
+         return name; 
+    }
+    int getAge() const{ 
+        return age; 
+    }
+    int getID() const {
+         return ID; 
+    }
+    string getContact() const {
+         return contact;
+    }
+
+    virtual void displayDetails() {
+        cout << "Name: " << getn() << ", Age: " << getAge() 
+             << ", ID: " << getID() << ", Contact: " << getContact() << endl;
+    }
+
+    virtual float calculatePayment() { 
+        return 0; 
+    }
+};
+
+class Student : public Person {
+private:
+    string enrollment_date;
+    string program;
+    float GPA;
+
+public:
+
+    Student(string name, int age, int id, string c, string ed, string p, float gpa)
+        : Person(name, age, id, c), enrollment_date(ed), program(p), GPA(gpa) {}
+
+    void displayDetails() override {
+        Person::displayDetails();
+        cout << "Enrollment Date: " << enrollment_date << ", Program: " << program 
+             << ", GPA: " << GPA << endl;
+    }
+
+    float calculatePayment() override { return 0.0f; }
+};
+
+class Professor : public Person {
+private:
+    string department;
+    string specialization;
+    string hireDate;
+    float salary;
+
+public:
+   
+    Professor(string name, int age, int id, string c, string dept, string spec, string hd, float sal)
+    : Person(name, age, id, c), department(dept), specialization(spec), hireDate(hd), salary(sal) {}
+
+    void displayDetails() override {
+        Person::displayDetails();
+        cout << "Department: " << department << ", Specialization: " << specialization 
+             << ", Hire Date: " << hireDate << ", Salary: $" << salary << endl;
+    }
+
+    float calculatePayment() override { return salary; }
+};
+
+class Course {
+private:
+    string code;
+    string title;
+    int credit;
+    string description;
+
+public:
+   
+    Course(string c, string t, int cd, string des) : code(c), title(t), credit(cd), description(des) {}
+
+    void setCode(string c) {
+        code = c; 
+    }
+    void setTitle(string t) {
+         title = t; 
+    }
+    void setCredit(int cd) { 
+        credit = (cd > 0) ? cd : 1; 
+    }
+    void setDescription(string d) { 
+        description = d; 
+    }
+
+    string getCode() const {
+        return code; 
+    }
+    string getTitle() const {
+        return title; 
+    }
+    int getCredit() const { 
+        return credit; }
+    string getDescription() const { 
+        return description; 
+    }
+
+    // Display course details
+    void display() const {
+        cout << "Course: " << getCode() << " - " << getTitle() 
+             << ", Credits: " << getCredit() << ", Description: " << getDescription() << endl;
+    }
+};
+class GradeBook {
+private:
+    vector<int> studentIDs;
+    vector<float> grades;
+
+public:
+    void addGrade(int studentID, float grade) {
+        studentIDs.push_back(studentID);
+        grades.push_back(grade);
+    }
+
+    float calculateAverageGrade() {
+        float sum = 0;
+        for (float grade : grades) {
+            sum += grade;
+        }
+        return grades.empty() ? 0.0f : sum / grades.size();
+    }
+    float getHighestGrade() {
+        float highest = -1;
+        for (float grade : grades) {
+            if (grade > highest) highest = grade;
+        }
+        return highest;
+    }
+    vector<int> getFailingStudents() {
+        vector<int> failStudents;
+        for (size_t i = 0; i < grades.size(); ++i) {
+            if (grades[i] < 2.0f) {
+                failStudents.push_back(studentIDs[i]);
+            }
+        }
+        return failStudents;
+    }
+};
+class EnrollmentManager {
+private:
+    vector<int> enrolledStudents;
+    vector<string> courses;
+
+public:
+    void enrollStudent(int studentID, string courseCode) {
+        enrolledStudents.push_back(studentID);
+        courses.push_back(courseCode);
+    }
+    void dropStudent(int studentID, string courseCode) {
+        for (size_t i = 0; i < enrolledStudents.size(); ++i) {
+            if (enrolledStudents[i] == studentID && courses[i] == courseCode) {
+                enrolledStudents.erase(enrolledStudents.begin() + i);
+                courses.erase(courses.begin() + i);
+                break;
+            }
+        }
+    }
+    int getEnrollmentCount() {
+        return enrolledStudents.size();
+    }
+};
+int main() {
+
+    Student s1("Ali", 20, 1, "9837373887", "2025-08-05", "BTECH", 4.1);
+    Student s2("Sara", 21, 2, "8799776789", "2025-03-04", "BBA", 3.2);
+    Professor p1("Dr. Riya", 45, 201, "8768678768", "CS", "AI", "2025-08-15", 5000);
+    Professor p2("Dr. Sia", 50, 202, "6876876786", "Btech", "CSE", "2025-09-01", 5500);
+
+    Course c1("CS101", "C Programming", 3, "Learn basics of C++");
+    Course c2("MKT201", "Python Programming", 2, "Learn Python");
+
+    GradeBook gradeBook;
+    gradeBook.addGrade(1, 4.0);
+    gradeBook.addGrade(2, 3.5);
+
+    EnrollmentManager enrollmentManager;
+    enrollmentManager.enrollStudent(1, "CS101");
+    enrollmentManager.enrollStudent(2, "MKT201");
+
+    Person* people[] = { &s1, &s2, &p1, &p2 };
+
+    for (Person* p : people) {
+        p->displayDetails();  
+        cout << "Payment: $" << p->calculatePayment() << endl;
+    }
+    cout << "Average Grade: " << gradeBook.calculateAverageGrade() << endl;
+    cout << "Highest Grade: " << gradeBook.getHighestGrade() << endl;
+
+    vector<int> failing = gradeBook.getFailingStudents();
+    cout << "Failing Students: ";
+    for (int id : failing) {
+        cout << id << " ";
+    }
+    cout << endl;
+
+    cout << "Total Enrollments: " << enrollmentManager.getEnrollmentCount() << endl;
+
+    return 0;
+}
